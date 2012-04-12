@@ -1,0 +1,26 @@
+   pgstream v1.1 -- a C++ client-side library for PostgreSQL v7.4 or higher
+
+Copyright(C) 2004-2012 Daniel Verite <daniel@manitou-mail.org>
+See the file COPYING for distribution terms
+
+What's pgstream
+===============
+
+pgstream is a C++ library that is built on top of libpq.
+It aims at providing programmers an easier interface than the libpq C
+API when using C++.
+
+pgstream features wrapper classes for:
+- passing data back and forth the database through C++ streams.
+- transaction support, including nested transactions.
+- trapping database errors with C++ exceptions.
+- reading and writing binary data (bytea columns).
+- using cursors to efficiently retrieve large datasets.
+- using prepared statements and bind parameters.
+- automatically escaping query parameters.
+
+It does NOT attempt to provide wrappers for all operations covered by
+libpq, just the more common, but code using pgstream can be mixed with
+direct libpq calls.
+
+Also see the website: http://www.manitou-mail.org/pgstream

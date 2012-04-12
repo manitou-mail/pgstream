@@ -1,0 +1,56 @@
+AC_INIT(pgstream,1.0)
+AM_INIT_AUTOMAKE(pgstream, 1.0)
+AC_PROG_CXX
+AC_PROG_LIBTOOL
+
+pgincdir=""
+pglibdir=""
+
+AC_ARG_WITH(pgsql_includes,
+         [  --with-pgsql-includes=DIR    Specify location of PostgreSQL includes],
+         [      if test -n "$withval" -a ! "$withval" = "yes"; then
+                        CPPFLAGS="-I$withval $CPPFLAGS"
+			pgincdir=$withval;
+                fi
+         ])
+
+AC_ARG_WITH(pgsql_libs,
+         [  --with-pgsql-libs=DIR    Specify location of PostgreSQL library],
+         [      if test -n "$withval" -a ! "$withval" = "yes"; then
+                        LIBS="-L$withval $LIBS"
+			pglibdir=$withval;
+                fi
+         ])
+
+pgconfig=`which pg_config`
+if test -z $pgconfig; then
+    AC_MSG_WARN([Couldn't find pg_config in PATH.])
+else
+    if test -z "$pgincdir" -a -z "$pglibdir"; then
+      AC_MSG_CHECKING([for PostgreSQL version according to pg_config])
+      version=`pg_config --version | sed -e 's/PostgreSQL\ *//'`
+      AC_MSG_RESULT([$version])
+    fi
+    if test -z "$pgincdir"; then
+	pgincdir=`pg_config --includedir`
+	CPPFLAGS="-I$pgincdir $CPPFLAGS"
+    fi
+    if test -z "$pglibdir"; then
+	pglibdir=`pg_config --libdir`
+	LIBS="-L$pglibdir $LIBS"
+    fi
+fi
+
+AC_CHECK_HEADERS(libpq-fe.h, [has_pgsql_headers=1], [has_pgsql_headers=0])
+if test $has_pgsql_headers = 0; then
+  AC_MSG_ERROR([Couldn't find the PostgreSQL header file: libpq-fe.h.
+		Use --with-pgsql-includes=DIR option to specify includes location.])
+fi
+
+AC_CHECK_LIB(pq, PQexec, true, AC_MSG_ERROR([Unable to find the libpq library.
+		Use --with-pgsql-libs=DIR option to specify library location.]))
+
+AC_CHECK_LIB(pq, PQexecParams, true, AC_MSG_ERROR([The libpq library found lacks PQexecParams.
+		pgstream does not support PostgreSQL versions lower than v7.4]))
+
+AC_OUTPUT(Makefile src/Makefile)
